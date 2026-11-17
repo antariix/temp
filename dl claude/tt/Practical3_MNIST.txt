@@ -1,0 +1,87 @@
+TEXT EXPORT: Practical3_MNIST.ipynb
+========================================================================
+Exported notebook cells in their original order.
+Code cell outputs are not included; this file contains the cell source.
+
+------------------------ CELL 1 (CODE) ------------------------
+import numpy as np
+import pandas as pd
+import random 
+import tensorflow as tf
+import matplotlib.pyplot as plt
+
+from sklearn.metrics import accuracy_score
+from tensorflow.keras.models import Sequential
+from tensorflow.keras.layers import Flatten, Conv2D, Dense, MaxPooling2D
+from tensorflow.keras.optimizers import SGD
+from tensorflow.keras.datasets import mnist
+
+------------------------ CELL 2 (CODE) ------------------------
+(X_train, y_train), (X_test, y_test) = mnist.load_data()
+
+X_train = X_train / 255.0
+X_test = X_test / 255.0
+print(X_train.shape)
+print(X_test.shape)
+X_train = X_train.reshape(X_train.shape + (1,))
+X_test = X_test.reshape(X_test.shape + (1,))
+print(X_train.shape)
+print(X_test.shape)
+
+------------------------ CELL 3 (CODE) ------------------------
+def plot_digit(image, digit, plt, i):
+    plt.subplot(4,5,i+1)
+    plt.imshow(image, cmap="gray")
+    plt.title(f"digit: {digit}")
+    plt.xticks([])
+    plt.yticks([])
+plt.figure(figsize=(16,16))
+for i in range(20):
+    plot_digit(X_train[i].squeeze(),y_train[i],plt,i)
+plt.show()
+
+------------------------ CELL 4 (CODE) ------------------------
+model = Sequential([
+    Conv2D(32, (3,3), activation='relu', input_shape=(28,28,1)),
+    MaxPooling2D((2,2)),
+    Flatten(),
+    Dense(100, activation='relu'),
+    Dense(10, activation='softmax')
+])
+
+------------------------ CELL 5 (CODE) ------------------------
+optimizer = SGD(learning_rate=0.01, momentum=0.9)
+
+model.compile(
+    optimizer = optimizer,
+    loss = 'sparse_categorical_crossentropy',
+    metrics = ['accuracy']
+)
+model.summary()
+
+------------------------ CELL 6 (CODE) ------------------------
+history = model.fit(
+    X_train,
+    y_train,
+    epochs=10,
+    batch_size= 32
+)
+
+------------------------ CELL 7 (CODE) ------------------------
+plt.figure(figsize=(16,10))
+
+for i in range(20):
+    image = (X_test)[i].squeeze()
+    digit = np.argmax(model.predict(image.reshape((1,28,28,1)),verbose=0)[0])
+    plot_digit(image, digit, plt, i)
+plt.show()
+
+------------------------ CELL 8 (CODE) ------------------------
+predictions = np.argmax(model.predict(X_test), axis=-1)
+
+accuracy_score(y_test, predictions)
+
+------------------------ CELL 9 (CODE) ------------------------
+score = model.evaluate(X_test, y_test, verbose=1)
+print("loss :" ,score[0])
+print("accuracy :",score[1])
