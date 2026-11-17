@@ -1,0 +1,95 @@
+TEXT EXPORT: Practical2_MNIST.ipynb
+========================================================================
+Exported notebook cells in their original order.
+Code cell outputs are not included; this file contains the cell source.
+
+------------------------ CELL 1 (CODE) ------------------------
+import numpy as np
+import matplotlib.pyplot as plt
+import tensorflow as tf
+from tensorflow import keras
+from tensorflow.keras import layers
+from tensorflow.keras.datasets import mnist
+from tensorflow.keras.optimizers import SGD
+
+------------------------ CELL 2 (CODE) ------------------------
+(X_train , y_train), (X_test , y_test) = mnist.load_data()
+print("Training images",X_train.shape)
+print("Training labels",y_train.shape)
+print("Testing images",X_test.shape)
+print("Testing labels",y_test.shape)
+
+------------------------ CELL 3 (CODE) ------------------------
+plt.figure(figsize=(4,4))
+plt.imshow(X_train[0], cmap = 'gray')
+plt.title(f'lable: {y_train[0]}')
+plt.axis('off')
+plt.show()
+
+------------------------ CELL 4 (CODE) ------------------------
+print("image shape:", X_train[0].shape) 
+print("min pixel value:", X_train[0].min()) 
+print("max pixel value:", X_train[0].max()) 
+print("\nPixel matrix :\n")
+
+------------------------ CELL 5 (CODE) ------------------------
+X_train = X_train.astype('float32') / 255.0
+X_test = X_test.astype('float32') / 255.0
+print("min pixel value:", X_train.min()) 
+print("max pixel value:", X_train.max())
+
+------------------------ CELL 6 (CODE) ------------------------
+model = keras.Sequential([
+    keras.layers.Flatten(input_shape =(28, 28)),
+    keras.layers.Dense(64, activation='relu'),
+    keras.layers.Dense(10, activation='softmax')
+])
+model.summary()
+
+------------------------ CELL 7 (CODE) ------------------------
+model.compile(
+    optimizer=SGD(learning_rate=0.01),
+    loss='sparse_categorical_crossentropy',
+    metrics=['accuracy']
+)
+
+------------------------ CELL 8 (CODE) ------------------------
+history = model.fit(
+    X_train,
+    y_train,
+    epochs=20,
+    batch_size=32,
+    validation_split=0.1
+)
+
+------------------------ CELL 9 (CODE) ------------------------
+test_loss, test_accuracy = model.evaluate(
+    X_test,
+    y_test,
+    verbose=1
+)
+print("Test loss :",test_loss)
+print("Test accuracy :",test_accuracy)
+
+------------------------ CELL 10 (CODE) ------------------------
+plt.figure(figsize=(8,5))
+plt.plot(history.history['accuracy'], label='Training Accuracy')
+plt.plot(history.history['val_accuracy'], label='Validation Accuracy')
+plt.title('Model Accuracy')
+plt.xlabel('Epoch')
+plt.ylabel('Accuracy')
+plt.legend()
+plt.grid(True)
+
+plt.show()
+
+------------------------ CELL 11 (CODE) ------------------------
+plt.figure(figsize=(8,5))
+plt.plot(history.history["val_loss"], label= "Validation Loss")
+plt.plot(history.history["loss"], label= "Training Loss")
+plt.title("Model Loss")
+plt.xlabel("Epoch")
+plt.ylabel("Loss")
+plt.legend()
+plt.grid(True)
+plt.show()
